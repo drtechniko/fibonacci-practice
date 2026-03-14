@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Shop Bargains — OlimBlock</title>
+
+<script src="https://unpkg.com/blockly@10.4.3/blockly_compressed.js"></script>
+<script src="https://unpkg.com/blockly@10.4.3/blocks_compressed.js"></script>
+<script src="https://unpkg.com/blockly@10.4.3/javascript_compressed.js"></script>
+<script src="https://unpkg.com/blockly@10.4.3/msg/en.js"></script>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+
+<style>
+:root{--green:#22a855;--green-dk:#176e39;--green-lt:#eafbf0;--green-mid:#a7dfbd;--amber:#f59e0b;--amber-lt:#fffbeb;--red:#ef4444;--red-lt:#fff1f1;--blue:#3b82f6;--blue-lt:#eff6ff;--g50:#f9fafb;--g100:#f3f4f6;--g200:#e5e7eb;--g400:#9ca3af;--g600:#4b5563;--g700:#374151;--g800:#1f2937;--g900:#111827}*{box-sizing:border-box;margin:0;padding:0}body{font-family:'Nunito',sans-serif;background:#eef6f1;height:100vh;display:flex;flex-direction:column;overflow:hidden}#load-error{display:none;background:#fef2f2;border-bottom:2px solid #fca5a5;color:#991b1b;font-size:13px;font-weight:700;padding:10px 20px;text-align:center}#topbar{background:var(--green-dk);color:#fff;height:50px;padding:0 18px;display:flex;align-items:center;gap:14px;flex-shrink:0;box-shadow:0 2px 10px rgba(0,0,0,.2)}.logo{font-size:18px;font-weight:900;letter-spacing:-.5px}.logo em{color:var(--green-mid);font-style:normal}.prob-title{font-size:13px;font-weight:700;opacity:.8}.sp{flex:1}#lvl-tabs{display:flex;gap:4px}.lvl-tab{padding:4px 13px;border-radius:20px;font-size:12px;font-weight:800;cursor:pointer;border:2px solid rgba(255,255,255,.3);color:rgba(255,255,255,.65);background:transparent;transition:all .15s;font-family:'Nunito',sans-serif}.lvl-tab:hover{border-color:#fff;color:#fff}.lvl-tab.active{background:#fff;color:var(--green-dk);border-color:#fff}.lvl-tab.done{background:var(--green);border-color:var(--green);color:#fff}.lvl-tab.active.done{background:#fff;color:var(--green-dk)}#prog-wrap{height:4px;background:var(--g200);flex-shrink:0}#prog-bar{height:100%;background:var(--green);width:0%;transition:width .5s}#main{display:flex;flex:1;overflow:hidden}#left{width:640px;min-width:360px;background:#fff;border-right:2px solid var(--g200);display:flex;flex-direction:column;overflow-y:auto;flex-shrink:0}.sec{padding:18px 22px;border-bottom:1px solid var(--g100)}.sec:last-child{border-bottom:none}.sec-lbl{font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.09em;color:var(--g400);margin-bottom:10px}.prob-body{font-size:19px;line-height:1.65;color:var(--g700)}.prob-body strong{color:var(--g900)}.var-grid{display:flex;flex-direction:column;gap:6px}.var-row{display:flex;align-items:center;gap:0;border-radius:8px;overflow:hidden;border:1px solid var(--g200);font-size:18px}.var-name{background:var(--green-dk);color:#fff;font-family:'DM Mono',monospace;font-weight:500;padding:8px 12px;min-width:80px}.var-val{background:var(--g50);color:var(--g700);font-family:'DM Mono',monospace;padding:8px 12px;flex:1;word-break:break-all}.var-desc{background:var(--g100);color:var(--g400);padding:8px 10px;font-size:14px;white-space:nowrap}.exp-box{background:var(--amber-lt);border:1px solid #fcd34d;border-radius:8px;padding:12px 16px;font-size:18px;color:var(--g600)}.exp-val{font-family:'DM Mono',monospace;font-weight:900;font-size:33px;color:var(--g900);margin-top:4px}#out-box{border-radius:8px;padding:12px 16px;min-height:80px;background:var(--g100);border:1px solid var(--g200);transition:background .3s,border-color .3s}#out-box.pass{background:var(--green-lt);border-color:var(--green-mid)}#out-box.fail{background:var(--red-lt);border-color:#fca5a5}.out-lbl{font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.07em;color:var(--g400);margin-bottom:4px}#out-box.pass .out-lbl{color:var(--green-dk)}#out-box.fail .out-lbl{color:var(--red)}#out-val{font-family:'DM Mono',monospace;font-size:36px;font-weight:900;color:var(--g800)}#out-box.pass #out-val{color:var(--green-dk)}#out-box.fail #out-val{color:var(--red)}#out-msg{font-size:18px;margin-top:4px;color:var(--g400)}#out-box.pass #out-msg{color:var(--green-dk)}#out-box.fail #out-msg{color:var(--red)}.hint-box{background:var(--blue-lt);border:1px solid #bfdbfe;border-radius:8px;padding:12px 16px;font-size:18px;color:#1d4ed8;line-height:1.55}#log{background:#111827;border-radius:8px;padding:10px 12px;font-family:'DM Mono',monospace;font-size:14px;color:#6ee7b7;min-height:80px;max-height:200px;overflow-y:auto;line-height:1.8}.ll{opacity:.75}.lhi{color:#fde68a}.le{color:#fca5a5}#right{flex:1;display:flex;flex-direction:column;overflow:hidden}#toolbar{background:#fff;border-bottom:2px solid var(--g200);padding:8px 14px;display:flex;align-items:center;gap:7px;flex-shrink:0}.btn{display:inline-flex;align-items:center;gap:5px;padding:6px 14px;border-radius:8px;font-family:'Nunito',sans-serif;font-size:12px;font-weight:800;cursor:pointer;border:none;transition:all .15s;white-space:nowrap}.btn-run{background:var(--green);color:#fff}.btn-run:hover{background:var(--green-dk)}.btn-run:active{transform:scale(.97)}.btn-step{background:var(--blue-lt);color:var(--blue);border:1.5px solid #bfdbfe}.btn-step:hover{background:#dbeafe}.btn-reset{background:var(--g100);color:var(--g600);border:1.5px solid var(--g200)}.btn-reset:hover{background:var(--g200)}.btn-clear{background:var(--red-lt);color:var(--red);border:1.5px solid #fca5a5}.btn-clear:hover{background:#fecaca}.tb-sp{flex:1}#step-badge{background:var(--blue-lt);color:var(--blue);border:1.5px solid #bfdbfe;border-radius:20px;padding:3px 11px;font-size:11px;font-weight:800;display:none}#bly{flex:1;overflow:hidden;position:relative}#cfetti{position:fixed;inset:0;pointer-events:none;z-index:9999}
+</style>
+</head>
+<body>
+<div id="load-error">⚠️ Blockly failed to load. Check your internet connection and refresh.</div>
+<div id="topbar">
+  <div class="logo">🏪 <em>OlimBlock</em></div>
+  <div class="prob-title">Shop Bargains</div>
+  <div class="sp"></div>
+  <div id="lvl-tabs">
+    <button class="lvl-tab active" onclick="loadLevel(0)">Level 1</button>
+    <button class="lvl-tab"        onclick="loadLevel(1)">Level 2</button>
+    <button class="lvl-tab"        onclick="loadLevel(2)">Level 3</button>
+    <button class="lvl-tab"        onclick="loadLevel(3)">Level 4</button>
+  </div>
+</div>
+<div id="prog-wrap"><div id="prog-bar"></div></div>
+<div id="main">
+  <div id="left">
+    <div class="sec">
+      <div class="sec-lbl">Problem</div>
+      <div class="prob-body">
+        A shop has <strong>N items</strong> listed from <strong>cheapest to most expensive</strong>.<br><br>
+        You have <strong>M</strong> euros to spend. You want to buy as many items as possible.<br><br>
+        <em>Greedy strategy:</em> buy items in order from cheapest first. Stop when you can't afford the next item.<br><br>
+        How many items can you buy?
+      </div>
+    </div>
+    <div class="sec">
+      <div class="sec-lbl">Input Variables (pre-loaded)</div>
+      <div class="var-grid" id="in-display"></div>
+      <div style="margin-top:10px;font-size:15px;color:var(--g400);">💡 Drag <strong>N</strong>, <strong>M</strong>, and <strong>price of item i</strong> from <strong>Inputs</strong>.</div>
+    </div>
+    <div class="sec"><div class="sec-lbl">Your Output</div><div id="out-box"><div class="out-lbl">Result</div><div id="out-val">—</div><div id="out-msg">Run your program to see the result.</div></div></div>
+    <div class="sec"><div class="sec-lbl">Execution Log</div><div id="log"><span class="ll">Ready. Press ▶ Run to start.</span></div></div>
+    <div class="sec"><div class="sec-lbl">Expected Answer</div><div class="exp-box">Answer: <div class="exp-val" id="exp-val">?</div></div></div>
+    <div class="sec"><div class="sec-lbl">Hint</div><div class="hint-box" id="hint-box"></div></div>
+  </div>
+  <div id="right">
+    <div id="toolbar">
+      <button class="btn btn-run" onclick="runCode()">▶ Run</button>
+      <button class="btn btn-step" onclick="doStep()">⏭ Step</button>
+      <button class="btn btn-reset" onclick="resetStep()">↺ Reset</button>
+      <button class="btn btn-clear" onclick="clearWS()">🗑 Clear Blocks</button>
+      <div id="step-badge">Step <span id="snum">0</span></div><div class="tb-sp"></div>
+    </div>
+    <div id="bly"></div>
+  </div>
+</div>
+<canvas id="cfetti"></canvas>
+
+<script>
+// prices are PRE-SORTED cheapest to most expensive
+const LEVELS = [
+  { prices:[2,5,8], M:10, hint:"Set <strong>budget = M</strong> and <strong>count = 0</strong>. Loop i from 1 to N. If <em>budget ≥ price of item i</em>: subtract the price from budget and add 1 to count. After the loop, print count." },
+  { prices:[1,3,4,7,10], M:12, hint:"Same approach — buy from cheapest. 1+3+4=8 (3 items), next is 7 and 8+7=15 > 12. So you buy 3 items." },
+  { prices:[5,10,15,20], M:3, hint:"Can't afford even the cheapest item! Your answer should be 0." },
+  { prices:[1,2,3,4,5,6,8,10,12,15], M:25, hint:"10 items. Start buying from the cheapest: 1+2+3+4+5+6=21 (6 items). Next is 8, and 21+8=29 > 25. Answer: 6." }
+];
+LEVELS.forEach(lv => {
+  lv.N = lv.prices.length;
+  let budget = lv.M, count = 0;
+  for (let i = 0; i < lv.N; i++) {
+    if (budget >= lv.prices[i]) { budget -= lv.prices[i]; count++; }
+    else break;
+  }
+  lv.expected = count;
+});
+
+let currentLevel=0,ws=null,solved=[false,false,false,false],stepLines=[],stepIdx=0;
+
+function defineCustomBlocks(){
+  const gen=Blockly.JavaScript;
+  Blockly.Blocks['program_start']={init:function(){this.appendDummyInput().appendField('🟢  Start program');this.setNextStatement(true,null);this.setColour(120);this.setDeletable(false);this.setMovable(true)}};gen.forBlock['program_start']=function(){return ''};
+  Blockly.Blocks['program_end']={init:function(){this.appendDummyInput().appendField('🔴  End program');this.setPreviousStatement(true,null);this.setColour(0);this.setDeletable(false);this.setMovable(true)}};gen.forBlock['program_end']=function(){return ''};
+  Blockly.Blocks['input_N']={init:function(){this.appendDummyInput().appendField('N');this.setOutput(true,'Number');this.setColour(210);this.setTooltip('Number of items')}};gen.forBlock['input_N']=function(){return ['N',gen.ORDER_ATOMIC]};
+  Blockly.Blocks['input_M']={init:function(){this.appendDummyInput().appendField('M');this.setOutput(true,'Number');this.setColour(210);this.setTooltip('Your budget in euros')}};gen.forBlock['input_M']=function(){return ['M',gen.ORDER_ATOMIC]};
+  Blockly.Blocks['price_at']={init:function(){this.appendValueInput('INDEX').setCheck('Number').appendField('price of item');this.setInputsInline(true);this.setOutput(true,'Number');this.setColour(290);this.setTooltip('Price of item i in euros (items sorted cheapest first, 1 to N)')}};
+  gen.forBlock['price_at']=function(block,generator){const idx=generator.valueToCode(block,'INDEX',gen.ORDER_NONE)||'1';return ['prices[(' + idx + ') - 1]',gen.ORDER_MEMBER]};
+  Blockly.Blocks['print_answer']={init:function(){this.appendValueInput('VALUE').setCheck('Number').appendField('📤  print answer');this.setPreviousStatement(true,null);this.setNextStatement(true,null);this.setColour(160)}};gen.forBlock['print_answer']=function(block,generator){const val=generator.valueToCode(block,'VALUE',gen.ORDER_NONE)||'0';return 'window.alert('+val+');\n'};
+}
+
+const TOOLBOX=`<xml xmlns="https://developers.google.com/blockly/xml">
+  <category name="📥 Inputs" colour="210"><block type="input_N"></block><block type="input_M"></block><block type="price_at"><value name="INDEX"><shadow type="math_number"><field name="NUM">1</field></shadow></value></block></category>
+  <category name="🔀 Logic" colour="#5C81A6"><block type="controls_if"></block><block type="controls_if"><mutation else="1"></mutation></block><block type="logic_compare"><field name="OP">GTE</field></block><block type="logic_compare"><field name="OP">LT</field></block></category>
+  <category name="🔁 Loops" colour="#5CA65C"><block type="controls_for"><field name="VAR">i</field><value name="FROM"><shadow type="math_number"><field name="NUM">1</field></shadow></value><value name="TO"><shadow type="math_number"><field name="NUM">10</field></shadow></value><value name="BY"><shadow type="math_number"><field name="NUM">1</field></shadow></value></block></category>
+  <category name="🔢 Math" colour="#5C68A6"><block type="math_number"><field name="NUM">0</field></block><block type="math_number"><field name="NUM">1</field></block><block type="math_arithmetic"><field name="OP">ADD</field></block><block type="math_arithmetic"><field name="OP">MINUS</field></block></category>
+  <category name="📦 Variables" colour="#A65C81" custom="VARIABLE"></category>
+  <category name="📤 Output" colour="160"><block type="print_answer"><value name="VALUE"><shadow type="math_number"><field name="NUM">0</field></shadow></value></block></category>
+</xml>`;
+const WORKSPACE_XML=`<xml xmlns="https://developers.google.com/blockly/xml"><block type="program_start" x="60" y="60" deletable="false" movable="true"></block><block type="program_end" x="60" y="380" deletable="false" movable="true"></block></xml>`;
+
+window.addEventListener('DOMContentLoaded',function(){
+  if(typeof Blockly==='undefined'||typeof Blockly.inject!=='function'){document.getElementById('load-error').style.display='block';return}
+  if(typeof Blockly.JavaScript==='undefined'){document.getElementById('load-error').textContent='⚠️ Blockly JS generator failed.';document.getElementById('load-error').style.display='block';return}
+  defineCustomBlocks();ws=Blockly.inject('bly',{toolbox:TOOLBOX,scrollbars:true,trashcan:true,zoom:{controls:true,wheel:true,startScale:1.0,maxScale:3,minScale:0.3,scaleSpeed:1.2},grid:{spacing:24,length:4,colour:'#e5e7eb',snap:true}});
+  window.addEventListener('resize',()=>Blockly.svgResize(ws));loadLevel(0);
+});
+
+function loadLevel(idx){
+  currentLevel=idx;resetStep();const lv=LEVELS[idx];
+  document.querySelectorAll('.lvl-tab').forEach((t,i)=>{const c=['lvl-tab'];if(i===idx)c.push('active');if(solved[i])c.push('done');t.className=c.join(' ')});
+  document.getElementById('in-display').innerHTML=`
+    <div class="var-row"><span class="var-name">N</span><span class="var-val">${lv.N}</span><span class="var-desc">number of items</span></div>
+    <div class="var-row"><span class="var-name">M</span><span class="var-val">${lv.M}</span><span class="var-desc">your budget (€)</span></div>
+    <div class="var-row"><span class="var-name">price of item i</span><span class="var-val">${lv.prices.map((v,i)=>`item ${i+1}: €${v}`).join(', ')}</span><span class="var-desc">sorted cheapest first</span></div>`;
+  document.getElementById('exp-val').textContent=lv.expected;document.getElementById('hint-box').innerHTML=lv.hint;
+  const ob=document.getElementById('out-box');ob.className='';document.getElementById('out-val').textContent='—';document.getElementById('out-msg').textContent='Run your program to see the result.';
+  Blockly.Xml.clearWorkspaceAndLoadFromXml(Blockly.utils.xml.textToDom(WORKSPACE_XML),ws);
+  clearLog();addLog(`Level ${idx+1} — N=${lv.N}, M=${lv.M}, expected: ${lv.expected}`);addLog(`Prices: ${lv.prices.map((v,i)=>`[${i+1}]=€${v}`).join('  ')}`);updateProg();
+}
+
+function runCode(){
+  resetStep();const lv=LEVELS[currentLevel];clearLog();
+  let code;try{code=Blockly.JavaScript.workspaceToCode(ws)}catch(e){addErr('Code generation failed: '+e.message);return}
+  if(!code.trim()){addErr('Workspace has no logic yet!');return}
+  addLog('Running...');const captured=[];const origAlert=window.alert;window.alert=v=>captured.push(String(v));
+  let err=null;try{new Function(`var N=${lv.N};var M=${lv.M};var prices=${JSON.stringify(lv.prices)};\n${code}`)()}catch(e){err=e.message}
+  window.alert=origAlert;
+  if(err){addErr('Runtime error: '+err);showOut(null,false);return}
+  if(!captured.length){addErr('No answer printed!');showOut(null,false);return}
+  const raw=captured[captured.length-1];const userAns=Number(raw);addLog('Your output: '+captured.join(' → '));
+  if(isNaN(userAns)){addErr('Expected a number');showOut(null,false);return}
+  const ok=userAns===lv.expected;showOut(userAns,ok);
+  if(ok){solved[currentLevel]=true;updateProg();addLog('✅ Correct! You can buy '+lv.expected+' items!');doConfetti();document.querySelectorAll('.lvl-tab').forEach((t,i)=>{const c=['lvl-tab'];if(i===currentLevel)c.push('active');if(solved[i])c.push('done');t.className=c.join(' ')})}
+  else{addLog(`❌ Got ${userAns}, expected ${lv.expected}. Try again!`)}
+}
+
+function doStep(){const lv=LEVELS[currentLevel];if(!stepLines.length){let code;try{code=Blockly.JavaScript.workspaceToCode(ws)}catch(e){addErr(e.message);return}if(!code.trim()){addErr('Empty workspace!');return}const full=`var N=${lv.N};var M=${lv.M};var prices=${JSON.stringify(lv.prices)};\n${code}`;stepLines=full.split('\n').filter(l=>l.trim().length>0);stepIdx=0;clearLog();addLog('Step mode');document.getElementById('step-badge').style.display='inline-block'}if(stepIdx>=stepLines.length){addLog('— end —');stepLines=[];stepIdx=0;document.getElementById('step-badge').style.display='none';runCode();return}const line=stepLines[stepIdx];document.getElementById('snum').textContent=stepIdx+1;const el=document.createElement('div');el.className='lhi';el.textContent=`[${stepIdx+1}] ${line}`;const lb=document.getElementById('log');lb.appendChild(el);lb.scrollTop=99999;const blocks=ws.getAllBlocks(false);blocks.forEach(b=>b.setHighlighted&&b.setHighlighted(false));if(blocks.length){const b=blocks[stepIdx%blocks.length];if(b.setHighlighted)b.setHighlighted(true)}stepIdx++}
+function resetStep(){stepLines=[];stepIdx=0;document.getElementById('step-badge').style.display='none';document.getElementById('snum').textContent='0';if(ws)ws.getAllBlocks(false).forEach(b=>b.setHighlighted&&b.setHighlighted(false))}
+function clearWS(){if(confirm('Reset workspace?')){loadLevel(currentLevel);clearLog();addLog('Workspace reset.')}}
+function showOut(val,ok){const ob=document.getElementById('out-box');document.getElementById('out-val').textContent=(val===null)?'—':val;if(val===null){ob.className='fail';document.getElementById('out-msg').textContent='Something went wrong — check the log.'}else if(ok){ob.className='pass';document.getElementById('out-msg').textContent='🎉 Correct! Amazing work!'}else{ob.className='fail';document.getElementById('out-msg').textContent=`Expected ${LEVELS[currentLevel].expected}. Try again!`}}
+function clearLog(){document.getElementById('log').innerHTML=''}
+function addLog(m){const lb=document.getElementById('log');const el=document.createElement('div');el.className='ll';el.textContent=m;lb.appendChild(el);lb.scrollTop=99999}
+function addErr(m){const lb=document.getElementById('log');const el=document.createElement('div');el.className='le';el.textContent='⚠ '+m;lb.appendChild(el);lb.scrollTop=99999}
+function updateProg(){document.getElementById('prog-bar').style.width=(solved.filter(Boolean).length/LEVELS.length*100)+'%'}
+function doConfetti(){const cv=document.getElementById('cfetti'),cx=cv.getContext('2d');cv.width=innerWidth;cv.height=innerHeight;const C=['#22a855','#f59e0b','#3b82f6','#ef4444','#8b5cf6','#ec4899','#06b6d4'];const P=Array.from({length:100},()=>({x:Math.random()*cv.width,y:-20-Math.random()*120,vx:(Math.random()-.5)*2.5,vy:2.5+Math.random()*3.5,r:4+Math.random()*6,t:Math.random()*360,tv:3+Math.random()*5,c:C[Math.floor(Math.random()*C.length)]}));let f=0;(function draw(){cx.clearRect(0,0,cv.width,cv.height);P.forEach(p=>{p.y+=p.vy;p.x+=p.vx;p.t+=p.tv;cx.save();cx.translate(p.x,p.y);cx.rotate(p.t*Math.PI/180);cx.fillStyle=p.c;cx.fillRect(-p.r/2,-p.r/2,p.r,p.r*2);cx.restore()});if(++f<160)requestAnimationFrame(draw);else cx.clearRect(0,0,cv.width,cv.height)})()}
+</script>
+</body>
+</html>

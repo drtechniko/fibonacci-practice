@@ -1,0 +1,629 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Fibonacci Practice</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+
+<style>
+:root {
+  --green: #22a855;
+  --green-dk: #176e39;
+  --green-lt: #eafbf0;
+  --green-mid: #a7dfbd;
+  --amber: #f59e0b;
+  --amber-lt: #fffbeb;
+  --red: #ef4444;
+  --red-lt: #fff1f1;
+  --blue: #3b82f6;
+  --blue-lt: #eff6ff;
+  --g50: #f9fafb;
+  --g100: #f3f4f6;
+  --g200: #e5e7eb;
+  --g400: #9ca3af;
+  --g600: #4b5563;
+  --g700: #374151;
+  --g800: #1f2937;
+  --g900: #111827;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: 'Nunito', sans-serif;
+  background: #eef6f1;
+  min-height: 100vh;
+  color: var(--g800);
+}
+
+/* ── PASSWORD GATE ── */
+#gate {
+  position: fixed;
+  inset: 0;
+  background: #eef6f1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  transition: opacity 0.4s;
+}
+#gate.hidden {
+  opacity: 0;
+  pointer-events: none;
+}
+.gate-card {
+  background: #fff;
+  border: 2px solid var(--g200);
+  border-radius: 16px;
+  padding: 40px 48px;
+  max-width: 440px;
+  width: 90%;
+  text-align: center;
+  box-shadow: 0 8px 40px rgba(0,0,0,0.08);
+}
+.gate-logo {
+  font-size: 22px;
+  font-weight: 900;
+  color: var(--green-dk);
+  margin-bottom: 24px;
+  letter-spacing: -0.5px;
+}
+.gate-logo em { color: var(--green); font-style: normal; }
+.gate-hint {
+  font-size: 17px;
+  font-weight: 700;
+  color: var(--g700);
+  margin-bottom: 6px;
+}
+.gate-sub {
+  font-size: 14px;
+  color: var(--g400);
+  margin-bottom: 24px;
+  line-height: 1.5;
+}
+.gate-input {
+  width: 100%;
+  padding: 12px 16px;
+  font-size: 20px;
+  font-family: 'DM Mono', monospace;
+  font-weight: 500;
+  border: 2px solid var(--g200);
+  border-radius: 10px;
+  text-align: center;
+  outline: none;
+  transition: border-color 0.15s;
+  margin-bottom: 14px;
+}
+.gate-input:focus { border-color: var(--green); }
+.gate-input.error { border-color: var(--red); animation: shake 0.35s ease; }
+.gate-btn {
+  width: 100%;
+  padding: 12px;
+  background: var(--green);
+  color: #fff;
+  font-family: 'Nunito', sans-serif;
+  font-size: 15px;
+  font-weight: 800;
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+.gate-btn:hover { background: var(--green-dk); }
+.gate-err {
+  font-size: 13px;
+  color: var(--red);
+  font-weight: 700;
+  margin-top: 10px;
+  min-height: 18px;
+}
+
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  20%       { transform: translateX(-8px); }
+  40%       { transform: translateX(8px); }
+  60%       { transform: translateX(-6px); }
+  80%       { transform: translateX(6px); }
+}
+
+/* ── TOPBAR ── */
+#topbar {
+  background: var(--green-dk);
+  color: #fff;
+  height: 54px;
+  padding: 0 28px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+.logo {
+  font-size: 20px;
+  font-weight: 900;
+  letter-spacing: -0.5px;
+}
+.logo em { color: var(--green-mid); font-style: normal; }
+.logo-sub {
+  font-size: 13px;
+  font-weight: 600;
+  opacity: 0.65;
+  margin-left: 4px;
+}
+
+/* ── LAYOUT ── */
+.page {
+  max-width: 860px;
+  margin: 0 auto;
+  padding: 40px 24px 80px;
+}
+
+/* ── SECTION HEADINGS ── */
+.section-title {
+  font-size: 11px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--g400);
+  margin-bottom: 16px;
+  margin-top: 48px;
+}
+.section-title:first-child { margin-top: 0; }
+
+/* ── ALGORITHM INTRO CARDS ── */
+.algo-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 14px;
+  margin-bottom: 8px;
+}
+.algo-card {
+  border-radius: 12px;
+  padding: 20px 22px;
+  border: 2px solid transparent;
+}
+.algo-card.sim  { background: var(--green-lt); border-color: var(--green-mid); }
+.algo-card.grdy { background: var(--amber-lt); border-color: #fcd34d; }
+.algo-card.dp   { background: var(--blue-lt);  border-color: #bfdbfe; opacity: 0.7; }
+.algo-icon { font-size: 28px; margin-bottom: 10px; }
+.algo-name {
+  font-size: 15px;
+  font-weight: 900;
+  margin-bottom: 8px;
+  color: var(--g900);
+}
+.algo-card.dp .algo-name { color: var(--g600); }
+.algo-desc {
+  font-size: 14px;
+  line-height: 1.65;
+  color: var(--g700);
+}
+.algo-card.dp .algo-desc { color: var(--g600); }
+.algo-soon {
+  display: inline-block;
+  margin-top: 10px;
+  font-size: 11px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--blue);
+  background: #dbeafe;
+  padding: 2px 8px;
+  border-radius: 20px;
+}
+
+/* ── TEACHING ORDER ── */
+.phase-block { margin-bottom: 32px; }
+.phase-label {
+  font-size: 12px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  margin-bottom: 10px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.phase-label .badge {
+  padding: 2px 10px;
+  border-radius: 20px;
+  font-size: 11px;
+}
+.badge-phase1 { background: var(--green-lt); color: var(--green-dk); border: 1.5px solid var(--green-mid); }
+.badge-phase2 { background: var(--amber-lt); color: #92400e;         border: 1.5px solid #fcd34d; }
+.badge-phase3 { background: var(--red-lt);   color: #991b1b;         border: 1.5px solid #fca5a5; }
+
+.prob-list { display: flex; flex-direction: column; gap: 6px; }
+.prob-item {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  border: 1.5px solid var(--g200);
+  border-radius: 10px;
+  overflow: hidden;
+  text-decoration: none;
+  background: #fff;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+.prob-item:hover {
+  border-color: var(--green);
+  box-shadow: 0 2px 12px rgba(34,168,85,0.12);
+}
+.prob-num {
+  background: var(--green-dk);
+  color: #fff;
+  font-family: 'DM Mono', monospace;
+  font-size: 13px;
+  font-weight: 500;
+  padding: 12px 14px;
+  min-width: 42px;
+  text-align: center;
+  align-self: stretch;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.prob-emoji {
+  padding: 12px 10px 12px 14px;
+  font-size: 20px;
+  line-height: 1;
+}
+.prob-info { padding: 10px 12px 10px 0; flex: 1; }
+.prob-name {
+  font-size: 15px;
+  font-weight: 800;
+  color: var(--g900);
+  margin-bottom: 2px;
+}
+.prob-pattern {
+  font-size: 12px;
+  color: var(--g400);
+  font-weight: 600;
+}
+.prob-tags { padding: 12px 14px 12px 0; display: flex; gap: 5px; align-items: center; flex-shrink: 0; }
+.tag {
+  font-size: 10px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  padding: 2px 8px;
+  border-radius: 20px;
+}
+.tag-sim   { background: var(--green-lt); color: var(--green-dk); }
+.tag-grdy  { background: var(--amber-lt); color: #92400e; }
+.tag-easy  { background: var(--g100);     color: var(--g600); }
+.tag-med   { background: #fef3c7;         color: #92400e; }
+.tag-hard  { background: var(--red-lt);   color: #991b1b; }
+
+/* ── BY CATEGORY SECTION ── */
+.cat-block { margin-bottom: 32px; }
+.cat-header {
+  font-size: 16px;
+  font-weight: 900;
+  color: var(--g900);
+  margin-bottom: 16px;
+  padding-bottom: 8px;
+  border-bottom: 2px solid var(--g200);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.diff-group { margin-bottom: 14px; }
+.diff-label {
+  font-size: 11px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--g400);
+  margin-bottom: 6px;
+}
+
+/* ── FOOTER ── */
+footer {
+  text-align: center;
+  padding: 24px;
+  font-size: 12px;
+  color: var(--g400);
+  font-weight: 600;
+}
+</style>
+</head>
+<body>
+
+<!-- PASSWORD GATE -->
+<div id="gate">
+  <div class="gate-card">
+    <div class="gate-logo">🌿 <em>Fibonacci Practice</em></div>
+    <div class="gate-hint">Enter the password to continue</div>
+    <div class="gate-sub">Hint: <strong>What is the 5th Fibonacci number?</strong><br>
+    (0, 1, 1, 2, 3, 5, 8 … — what's the 5th?)</div>
+    <input id="gate-input" class="gate-input" type="text" placeholder="?" autocomplete="off" autofocus>
+    <button class="gate-btn" onclick="checkPassword()">Enter →</button>
+    <div class="gate-err" id="gate-err"></div>
+  </div>
+</div>
+
+<!-- TOPBAR -->
+<div id="topbar">
+  <div class="logo">🌿 <em>Fibonacci</em> <span class="logo-sub">Practice</span></div>
+</div>
+
+<div class="page">
+
+  <!-- ALGORITHM INTRO -->
+  <div class="section-title">What kind of algorithms will we learn?</div>
+  <div class="algo-grid">
+    <div class="algo-card sim">
+      <div class="algo-icon">🎮</div>
+      <div class="algo-name">Simulation</div>
+      <div class="algo-desc">You follow a set of rules step by step, like a recipe. You're not trying to be clever — you just do exactly what the problem says, one step at a time.</div>
+    </div>
+    <div class="algo-card grdy">
+      <div class="algo-icon">🏆</div>
+      <div class="algo-name">Greedy</div>
+      <div class="algo-desc">At each step, you pick the best-looking option right now, without worrying about what comes later. Sometimes this works perfectly — but you have to know when!</div>
+    </div>
+    <div class="algo-card dp">
+      <div class="algo-icon">🧩</div>
+      <div class="algo-name">Dynamic Programming</div>
+      <div class="algo-desc">Some problems have subproblems that repeat. Instead of solving them over and over, you solve each one once, remember the answer, and reuse it.</div>
+      <span class="algo-soon">Coming soon</span>
+    </div>
+  </div>
+
+  <!-- RECOMMENDED TEACHING ORDER -->
+  <div class="section-title">Recommended order — start here!</div>
+
+  <div class="phase-block">
+    <div class="phase-label">
+      <span class="badge badge-phase1">Phase 1</span>
+      Foundations — master the basics
+    </div>
+    <div class="prob-list">
+      <a class="prob-item" href="simulation/easy/backpack-weight.html">
+        <div class="prob-num">1</div>
+        <div class="prob-emoji">🎒</div>
+        <div class="prob-info">
+          <div class="prob-name">Backpack Weight</div>
+          <div class="prob-pattern">Loop + accumulate (sum of array)</div>
+        </div>
+        <div class="prob-tags"><span class="tag tag-sim">Sim</span><span class="tag tag-easy">Easy</span></div>
+      </a>
+      <a class="prob-item" href="simulation/easy/best-score.html">
+        <div class="prob-num">2</div>
+        <div class="prob-emoji">🏆</div>
+        <div class="prob-info">
+          <div class="prob-name">Best Score</div>
+          <div class="prob-pattern">Loop + conditional update (find max)</div>
+        </div>
+        <div class="prob-tags"><span class="tag tag-sim">Sim</span><span class="tag tag-easy">Easy</span></div>
+      </a>
+      <a class="prob-item" href="simulation/easy/passing-grade.html">
+        <div class="prob-num">3</div>
+        <div class="prob-emoji">🎯</div>
+        <div class="prob-info">
+          <div class="prob-name">Passing Grade</div>
+          <div class="prob-pattern">Loop + condition + counter</div>
+        </div>
+        <div class="prob-tags"><span class="tag tag-sim">Sim</span><span class="tag tag-easy">Easy</span></div>
+      </a>
+      <a class="prob-item" href="simulation/easy/even-candy-count.html">
+        <div class="prob-num">4</div>
+        <div class="prob-emoji">🍬</div>
+        <div class="prob-info">
+          <div class="prob-name">Even Candy Count</div>
+          <div class="prob-pattern">Loop + condition + filtered sum (modulo)</div>
+        </div>
+        <div class="prob-tags"><span class="tag tag-sim">Sim</span><span class="tag tag-easy">Easy</span></div>
+      </a>
+    </div>
+  </div>
+
+  <div class="phase-block">
+    <div class="phase-label">
+      <span class="badge badge-phase2">Phase 2</span>
+      Core Patterns — combine what you know
+    </div>
+    <div class="prob-list">
+      <a class="prob-item" href="simulation/medium/apple-picking.html">
+        <div class="prob-num">5</div>
+        <div class="prob-emoji">🍎</div>
+        <div class="prob-info">
+          <div class="prob-name">Apple Picking</div>
+          <div class="prob-pattern">Loop + conditional accumulate (min-capped sum)</div>
+        </div>
+        <div class="prob-tags"><span class="tag tag-sim">Sim</span><span class="tag tag-med">Medium</span></div>
+      </a>
+      <a class="prob-item" href="simulation/medium/bank-account.html">
+        <div class="prob-num">6</div>
+        <div class="prob-emoji">🏦</div>
+        <div class="prob-info">
+          <div class="prob-name">Bank Account</div>
+          <div class="prob-pattern">Loop + running state + peak tracking + validity flag</div>
+        </div>
+        <div class="prob-tags"><span class="tag tag-sim">Sim</span><span class="tag tag-med">Medium</span></div>
+      </a>
+      <a class="prob-item" href="simulation/medium/rabbit-colony.html">
+        <div class="prob-num">7</div>
+        <div class="prob-emoji">🐰</div>
+        <div class="prob-info">
+          <div class="prob-name">Rabbit Colony</div>
+          <div class="prob-pattern">Loop with formula (floor division + multiplication)</div>
+        </div>
+        <div class="prob-tags"><span class="tag tag-sim">Sim</span><span class="tag tag-med">Medium</span></div>
+      </a>
+      <a class="prob-item" href="greedy/medium/project-portfolio.html">
+        <div class="prob-num">8</div>
+        <div class="prob-emoji">💼</div>
+        <div class="prob-info">
+          <div class="prob-name">Project Portfolio</div>
+          <div class="prob-pattern">Loop + conditional sum (include only positive values)</div>
+        </div>
+        <div class="prob-tags"><span class="tag tag-grdy">Greedy</span><span class="tag tag-med">Medium</span></div>
+      </a>
+      <a class="prob-item" href="greedy/easy/shop-bargains.html">
+        <div class="prob-num">9</div>
+        <div class="prob-emoji">🏪</div>
+        <div class="prob-info">
+          <div class="prob-name">Shop Bargains</div>
+          <div class="prob-pattern">Loop + budget tracking + greedy selection</div>
+        </div>
+        <div class="prob-tags"><span class="tag tag-grdy">Greedy</span><span class="tag tag-easy">Easy</span></div>
+      </a>
+    </div>
+  </div>
+
+  <div class="phase-block">
+    <div class="phase-label">
+      <span class="badge badge-phase3">Phase 3</span>
+      Challenge — think differently
+    </div>
+    <div class="prob-list">
+      <a class="prob-item" href="simulation/hard/complete-rectangle.html">
+        <div class="prob-num">10</div>
+        <div class="prob-emoji">📐</div>
+        <div class="prob-info">
+          <div class="prob-name">Complete the Rectangle</div>
+          <div class="prob-pattern">Pure conditional logic (if/else-if/else) — no loops</div>
+        </div>
+        <div class="prob-tags"><span class="tag tag-sim">Sim</span><span class="tag tag-hard">Hard</span></div>
+      </a>
+      <a class="prob-item" href="greedy/hard/road-trip-fuel.html">
+        <div class="prob-num">11</div>
+        <div class="prob-emoji">⛽</div>
+        <div class="prob-info">
+          <div class="prob-name">Road Trip Fuel</div>
+          <div class="prob-pattern">Loop + resource management + just-in-time refuelling</div>
+        </div>
+        <div class="prob-tags"><span class="tag tag-grdy">Greedy</span><span class="tag tag-hard">Hard</span></div>
+      </a>
+    </div>
+  </div>
+
+  <!-- BY CATEGORY -->
+  <div class="section-title">Browse by category</div>
+
+  <div class="cat-block">
+    <div class="cat-header">🎮 Simulation</div>
+
+    <div class="diff-group">
+      <div class="diff-label">Easy</div>
+      <div class="prob-list">
+        <a class="prob-item" href="simulation/easy/backpack-weight.html">
+          <div class="prob-emoji" style="padding-left:16px">🎒</div>
+          <div class="prob-info"><div class="prob-name">Backpack Weight</div><div class="prob-pattern">Loop + accumulate</div></div>
+        </a>
+        <a class="prob-item" href="simulation/easy/best-score.html">
+          <div class="prob-emoji" style="padding-left:16px">🏆</div>
+          <div class="prob-info"><div class="prob-name">Best Score</div><div class="prob-pattern">Loop + find max</div></div>
+        </a>
+        <a class="prob-item" href="simulation/easy/passing-grade.html">
+          <div class="prob-emoji" style="padding-left:16px">🎯</div>
+          <div class="prob-info"><div class="prob-name">Passing Grade</div><div class="prob-pattern">Loop + count with condition</div></div>
+        </a>
+        <a class="prob-item" href="simulation/easy/even-candy-count.html">
+          <div class="prob-emoji" style="padding-left:16px">🍬</div>
+          <div class="prob-info"><div class="prob-name">Even Candy Count</div><div class="prob-pattern">Loop + filtered sum + modulo</div></div>
+        </a>
+      </div>
+    </div>
+
+    <div class="diff-group">
+      <div class="diff-label">Medium</div>
+      <div class="prob-list">
+        <a class="prob-item" href="simulation/medium/apple-picking.html">
+          <div class="prob-emoji" style="padding-left:16px">🍎</div>
+          <div class="prob-info"><div class="prob-name">Apple Picking</div><div class="prob-pattern">Loop + min-capped sum</div></div>
+        </a>
+        <a class="prob-item" href="simulation/medium/bank-account.html">
+          <div class="prob-emoji" style="padding-left:16px">🏦</div>
+          <div class="prob-info"><div class="prob-name">Bank Account</div><div class="prob-pattern">Running state + peak + validity flag</div></div>
+        </a>
+        <a class="prob-item" href="simulation/medium/rabbit-colony.html">
+          <div class="prob-emoji" style="padding-left:16px">🐰</div>
+          <div class="prob-info"><div class="prob-name">Rabbit Colony</div><div class="prob-pattern">Loop with formula</div></div>
+        </a>
+      </div>
+    </div>
+
+    <div class="diff-group">
+      <div class="diff-label">Hard</div>
+      <div class="prob-list">
+        <a class="prob-item" href="simulation/hard/complete-rectangle.html">
+          <div class="prob-emoji" style="padding-left:16px">📐</div>
+          <div class="prob-info"><div class="prob-name">Complete the Rectangle</div><div class="prob-pattern">Pure conditional logic — no loops</div></div>
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <div class="cat-block">
+    <div class="cat-header">🏆 Greedy</div>
+
+    <div class="diff-group">
+      <div class="diff-label">Easy</div>
+      <div class="prob-list">
+        <a class="prob-item" href="greedy/easy/shop-bargains.html">
+          <div class="prob-emoji" style="padding-left:16px">🏪</div>
+          <div class="prob-info"><div class="prob-name">Shop Bargains</div><div class="prob-pattern">Loop + budget tracking + greedy selection</div></div>
+        </a>
+      </div>
+    </div>
+
+    <div class="diff-group">
+      <div class="diff-label">Medium</div>
+      <div class="prob-list">
+        <a class="prob-item" href="greedy/medium/project-portfolio.html">
+          <div class="prob-emoji" style="padding-left:16px">💼</div>
+          <div class="prob-info"><div class="prob-name">Project Portfolio</div><div class="prob-pattern">Loop + sum only positive values</div></div>
+        </a>
+      </div>
+    </div>
+
+    <div class="diff-group">
+      <div class="diff-label">Hard</div>
+      <div class="prob-list">
+        <a class="prob-item" href="greedy/hard/road-trip-fuel.html">
+          <div class="prob-emoji" style="padding-left:16px">⛽</div>
+          <div class="prob-info"><div class="prob-name">Road Trip Fuel</div><div class="prob-pattern">Resource management + just-in-time refuelling</div></div>
+        </a>
+      </div>
+    </div>
+  </div>
+
+</div><!-- /page -->
+
+<footer>Fibonacci Practice · drtechniko.github.io/fibonacci-practice</footer>
+
+<script>
+  const CORRECT = '5';
+
+  function checkPassword() {
+    const input = document.getElementById('gate-input');
+    const err   = document.getElementById('gate-err');
+    const val   = input.value.trim();
+    if (val === CORRECT) {
+      document.getElementById('gate').classList.add('hidden');
+      setTimeout(() => { document.getElementById('gate').style.display = 'none'; }, 450);
+    } else {
+      err.textContent = 'Not quite — try again!';
+      input.classList.remove('error');
+      void input.offsetWidth;
+      input.classList.add('error');
+      input.value = '';
+      input.focus();
+      setTimeout(() => { input.classList.remove('error'); }, 400);
+    }
+  }
+
+  document.getElementById('gate-input').addEventListener('keydown', function(e) {
+    if (e.key === 'Enter') checkPassword();
+  });
+</script>
+</body>
+</html>

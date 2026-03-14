@@ -302,7 +302,7 @@ body {
 }
 .tryit-instruct strong { color: var(--g900); }
 #tryit-blockly {
-  height: 220px;
+  height: 240px;
   width: 100%;
 }
 .tryit-bar {
@@ -329,15 +329,54 @@ body {
   transition: background 0.15s;
 }
 .tryit-run:hover { background: var(--green-dk); }
-#tryit-output {
-  font-family: 'DM Mono', monospace;
-  font-size: 14px;
-  font-weight: 500;
-  color: var(--g700);
+.tryit-bottom {
+  display: flex;
+  gap: 14px;
+  padding: 12px 18px;
+  border-top: 1px solid var(--g200);
+  background: #fff;
+}
+.tryit-expected {
+  background: var(--amber-lt);
+  border: 1px solid #fcd34d;
+  border-radius: 8px;
+  padding: 10px 14px;
+  font-size: 13px;
+  color: var(--g600);
   flex: 1;
 }
-#tryit-output.success { color: var(--green-dk); }
-#tryit-output.hint { color: var(--amber); }
+.tryit-expected .exp-label { font-weight: 800; margin-bottom: 2px; }
+.tryit-expected .exp-val {
+  font-family: 'DM Mono', monospace;
+  font-weight: 900;
+  font-size: 22px;
+  color: var(--g900);
+}
+.tryit-result {
+  border-radius: 8px;
+  padding: 10px 14px;
+  font-size: 13px;
+  flex: 1;
+  background: var(--g100);
+  border: 1px solid var(--g200);
+  transition: background 0.3s, border-color 0.3s;
+}
+.tryit-result .res-label { font-weight: 800; margin-bottom: 2px; color: var(--g400); }
+.tryit-result .res-val {
+  font-family: 'DM Mono', monospace;
+  font-weight: 900;
+  font-size: 22px;
+  color: var(--g800);
+}
+.tryit-result .res-msg { font-size: 12px; margin-top: 2px; color: var(--g400); }
+.tryit-result.pass { background: var(--green-lt); border-color: var(--green-mid); }
+.tryit-result.pass .res-label { color: var(--green-dk); }
+.tryit-result.pass .res-val { color: var(--green-dk); }
+.tryit-result.pass .res-msg { color: var(--green-dk); }
+.tryit-result.fail { background: var(--red-lt); border-color: #fca5a5; }
+.tryit-result.fail .res-label { color: var(--red); }
+.tryit-result.fail .res-val { color: var(--red); }
+.tryit-result.fail .res-msg { color: var(--red); }
 
 /* ── TEACHING ORDER ── */
 .phase-block { margin-bottom: 32px; scroll-margin-top: 70px; }
@@ -546,12 +585,22 @@ footer {
 
   <div class="tryit-wrap">
     <div class="tryit-instruct">
-      <strong>Try it!</strong> Drag the <strong>👋 say hello</strong> block from the toolbox and snap it between Start and End. Then press <strong>▶ Run</strong>.
+      <strong>Try it!</strong> Drag a <strong>📤 print answer</strong> block from the Output toolbox and snap it between Start and End. Type <strong>Hello</strong> in the text field. Then press <strong>▶ Run</strong>.
     </div>
     <div id="tryit-blockly"></div>
     <div class="tryit-bar">
       <button class="tryit-run" onclick="runTryIt()">▶ Run</button>
-      <div id="tryit-output"></div>
+    </div>
+    <div class="tryit-bottom">
+      <div class="tryit-expected">
+        <div class="exp-label">Expected Answer</div>
+        <div class="exp-val">Hello</div>
+      </div>
+      <div class="tryit-result" id="tryit-result">
+        <div class="res-label">Your Output</div>
+        <div class="res-val" id="tryit-val">—</div>
+        <div class="res-msg" id="tryit-msg">Run your program to see the result.</div>
+      </div>
     </div>
   </div>
 
@@ -939,19 +988,25 @@ footer {
     };
     gen.forBlock['tryit_end'] = function() { return ''; };
 
-    Blockly.Blocks['say_hello'] = {
+    Blockly.Blocks['tryit_print'] = {
       init: function() {
-        this.appendDummyInput().appendField('👋  say hello');
+        this.appendValueInput('VALUE')
+          .appendField('📤  print answer');
         this.setPreviousStatement(true, null);
         this.setNextStatement(true, null);
         this.setColour(160);
       }
     };
-    gen.forBlock['say_hello'] = function() {
-      return 'window.__tryit_output = "Hello!";\n';
+    gen.forBlock['tryit_print'] = function(block, generator) {
+      var val = generator.valueToCode(block, 'VALUE', gen.ORDER_NONE) || '""';
+      return 'window.__tryit_output = String(' + val + ');\n';
     };
 
-    var toolbox = '<xml><block type="say_hello"></block></xml>';
+    var toolbox = '<xml>' +
+      '<category name="📤 Output" colour="160">' +
+        '<block type="tryit_print"><value name="VALUE"><shadow type="text"><field name="TEXT">Hello</field></shadow></value></block>' +
+      '</category>' +
+      '</xml>';
 
     var ws = Blockly.inject('tryit-blockly', {
       toolbox: toolbox,
@@ -972,19 +1027,29 @@ footer {
 
   function runTryIt() {
     var ws = window.__tryit_ws;
-    var out = document.getElementById('tryit-output');
-    if (!ws) { out.textContent = 'Blockly not loaded.'; return; }
+    var box = document.getElementById('tryit-result');
+    var val = document.getElementById('tryit-val');
+    var msg = document.getElementById('tryit-msg');
+    if (!ws) return;
 
     window.__tryit_output = null;
     var code = javascript.javascriptGenerator.workspaceToCode(ws);
     try { eval(code); } catch(e) { /* ignore */ }
 
-    if (window.__tryit_output) {
-      out.textContent = 'Output: ' + window.__tryit_output;
-      out.className = 'success';
+    box.classList.remove('pass', 'fail');
+    if (window.__tryit_output != null) {
+      val.textContent = window.__tryit_output;
+      if (window.__tryit_output === 'Hello') {
+        box.classList.add('pass');
+        msg.textContent = 'Correct! You\'re ready to try the real problems.';
+      } else {
+        box.classList.add('fail');
+        msg.textContent = 'Not quite — make sure the text says "Hello".';
+      }
     } else {
-      out.textContent = 'Nothing to run yet — try snapping a block between Start and End!';
-      out.className = 'hint';
+      val.textContent = '—';
+      box.classList.add('fail');
+      msg.textContent = 'No answer printed! Drag a 📤 print answer block between Start and End.';
     }
   }
 

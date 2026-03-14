@@ -8,7 +8,7 @@ Middle school competitive programming practice using Blockly.
 
 ## What it is
 
-11 standalone, browser-based problems built with [Blockly](https://developers.google.com/blockly). Each problem has:
+16 standalone, browser-based problems built with [Blockly](https://developers.google.com/blockly). Each problem has:
 - 4 progressive difficulty levels
 - Auto-grading with immediate feedback
 - Confetti on completion 🎉
@@ -28,6 +28,10 @@ greedy/
   easy/       shop-bargains
   medium/     project-portfolio
   hard/       road-trip-fuel
+dp/
+  easy/       staircase, coin-change
+  medium/     frog-jump, broken-calculator
+  hard/       super-frog
 index.html    ← GitHub Pages landing page (password-protected)
 ```
 
@@ -54,11 +58,24 @@ Files are named by problem slug only (e.g. `backpack-weight.html`). Category and
 | 8 | 💼 Project Portfolio | Greedy: sum only positive values |
 | 9 | 🏪 Shop Bargains | Greedy: budget management |
 
-### Phase 3 — Challenge
+### Phase 3 — Challenge (Hard Sim + Greedy)
 | # | Problem | Pattern |
 |---|---------|---------|
 | 10 | 📐 Complete the Rectangle | Pure conditional logic — no loops |
 | 11 | ⛽ Road Trip Fuel | Greedy: just-in-time resource management |
+
+### Phase 4 — Intro DP
+| # | Problem | Pattern |
+|---|---------|---------|
+| 12 | 🪜 Staircase Climbing | dp[i] = dp[i−1] + dp[i−2] (count ways) |
+| 13 | 🪙 Coin Change | dp[i] = min(dp[i−1], dp[i−3]) + 1 (minimize coins) |
+
+### Phase 5 — DP Mastery
+| # | Problem | Pattern |
+|---|---------|---------|
+| 14 | 🐸 Frog Jump | dp[i] = min cost, 2 jump options + array input |
+| 15 | 🔢 Broken Calculator | Work backwards with while loop (÷2 or −1) |
+| 16 | 🐸 Super Frog Jump | 3 jump options + forbidden platform checks |
 
 ---
 
@@ -77,11 +94,16 @@ Files are named by problem slug only (e.g. `backpack-weight.html`). Category and
 | 🏪 Shop Bargains | `greedy/easy/shop-bargains.html` | Greedy | Easy |
 | 💼 Project Portfolio | `greedy/medium/project-portfolio.html` | Greedy | Medium |
 | ⛽ Road Trip Fuel | `greedy/hard/road-trip-fuel.html` | Greedy | Hard |
+| 🪜 Staircase Climbing | `dp/easy/staircase.html` | Dynamic Programming | Easy |
+| 🪙 Coin Change | `dp/easy/coin-change.html` | Dynamic Programming | Easy |
+| 🐸 Frog Jump | `dp/medium/frog-jump.html` | Dynamic Programming | Medium |
+| 🔢 Broken Calculator | `dp/medium/broken-calculator.html` | Dynamic Programming | Medium |
+| 🐸 Super Frog Jump | `dp/hard/super-frog.html` | Dynamic Programming | Hard |
 
 ---
 
 ## Not yet built
 
-- **Dynamic Programming:** Broken Calculator, SuperBunny Speedrun, Stack the Boxes
+- **Dynamic Programming:** Stack the Boxes
 - **More Simulation:** Ancient Fossils, Wheel of Fortune, Ant Competition, Carrot Monologue, Love Letters, Toy Soldier Field
 - **More Greedy:** Share the Chocolate, Dice Counterfeiting, Painting the Wall, Robot Collecting, Asocial Network

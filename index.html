@@ -189,7 +189,7 @@ body {
 }
 .algo-card.sim  { background: var(--green-lt); border-color: var(--green-mid); }
 .algo-card.grdy { background: var(--amber-lt); border-color: #fcd34d; }
-.algo-card.dp   { background: var(--blue-lt);  border-color: #bfdbfe; opacity: 0.7; }
+.algo-card.dp   { background: var(--blue-lt);  border-color: #bfdbfe; }
 .algo-icon { font-size: 28px; margin-bottom: 10px; }
 .algo-name {
   font-size: 15px;
@@ -197,24 +197,10 @@ body {
   margin-bottom: 8px;
   color: var(--g900);
 }
-.algo-card.dp .algo-name { color: var(--g600); }
 .algo-desc {
   font-size: 14px;
   line-height: 1.65;
   color: var(--g700);
-}
-.algo-card.dp .algo-desc { color: var(--g600); }
-.algo-soon {
-  display: inline-block;
-  margin-top: 10px;
-  font-size: 11px;
-  font-weight: 800;
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-  color: var(--blue);
-  background: #dbeafe;
-  padding: 2px 8px;
-  border-radius: 20px;
 }
 
 /* ── TEACHING ORDER ── */
@@ -237,6 +223,8 @@ body {
 .badge-phase1 { background: var(--green-lt); color: var(--green-dk); border: 1.5px solid var(--green-mid); }
 .badge-phase2 { background: var(--amber-lt); color: #92400e;         border: 1.5px solid #fcd34d; }
 .badge-phase3 { background: var(--red-lt);   color: #991b1b;         border: 1.5px solid #fca5a5; }
+.badge-phase4 { background: var(--blue-lt);  color: #1d4ed8;         border: 1.5px solid #bfdbfe; }
+.badge-phase5 { background: #ede9fe;         color: #5b21b6;         border: 1.5px solid #c4b5fd; }
 
 .prob-list { display: flex; flex-direction: column; gap: 6px; }
 .prob-item {
@@ -296,6 +284,7 @@ body {
 }
 .tag-sim   { background: var(--green-lt); color: var(--green-dk); }
 .tag-grdy  { background: var(--amber-lt); color: #92400e; }
+.tag-dp    { background: var(--blue-lt);  color: #1d4ed8; }
 .tag-easy  { background: var(--g100);     color: var(--g600); }
 .tag-med   { background: #fef3c7;         color: #92400e; }
 .tag-hard  { background: var(--red-lt);   color: #991b1b; }
@@ -372,7 +361,6 @@ footer {
       <div class="algo-icon">🧩</div>
       <div class="algo-name">Dynamic Programming</div>
       <div class="algo-desc">Some problems have subproblems that repeat. Instead of solving them over and over, you solve each one once, remember the answer, and reuse it.</div>
-      <span class="algo-soon">Coming soon</span>
     </div>
   </div>
 
@@ -505,6 +493,69 @@ footer {
     </div>
   </div>
 
+  <div class="phase-block">
+    <div class="phase-label">
+      <span class="badge badge-phase4">Phase 4</span>
+      Intro DP — remember your answers
+    </div>
+    <div class="prob-list">
+      <a class="prob-item" href="dp/easy/staircase.html">
+        <div class="prob-num">12</div>
+        <div class="prob-emoji">🪜</div>
+        <div class="prob-info">
+          <div class="prob-name">Staircase Climbing</div>
+          <div class="prob-pattern">dp[i] = dp[i−1] + dp[i−2] (count ways)</div>
+        </div>
+        <div class="prob-tags"><span class="tag tag-dp">DP</span><span class="tag tag-easy">Easy</span></div>
+      </a>
+      <a class="prob-item" href="dp/easy/coin-change.html">
+        <div class="prob-num">13</div>
+        <div class="prob-emoji">🪙</div>
+        <div class="prob-info">
+          <div class="prob-name">Coin Change</div>
+          <div class="prob-pattern">dp[i] = min(dp[i−1], dp[i−3]) + 1 (minimize coins)</div>
+        </div>
+        <div class="prob-tags"><span class="tag tag-dp">DP</span><span class="tag tag-easy">Easy</span></div>
+      </a>
+    </div>
+  </div>
+
+  <div class="phase-block">
+    <div class="phase-label">
+      <span class="badge badge-phase5">Phase 5</span>
+      DP Mastery — harder recurrences
+    </div>
+    <div class="prob-list">
+      <a class="prob-item" href="dp/medium/frog-jump.html">
+        <div class="prob-num">14</div>
+        <div class="prob-emoji">🐸</div>
+        <div class="prob-info">
+          <div class="prob-name">Frog Jump</div>
+          <div class="prob-pattern">dp[i] = min cost from dp[i−1] or dp[i−2] with array input</div>
+        </div>
+        <div class="prob-tags"><span class="tag tag-dp">DP</span><span class="tag tag-med">Medium</span></div>
+      </a>
+      <a class="prob-item" href="dp/medium/broken-calculator.html">
+        <div class="prob-num">15</div>
+        <div class="prob-emoji">🔢</div>
+        <div class="prob-info">
+          <div class="prob-name">Broken Calculator</div>
+          <div class="prob-pattern">Work backwards with while loop (÷2 or −1)</div>
+        </div>
+        <div class="prob-tags"><span class="tag tag-dp">DP</span><span class="tag tag-med">Medium</span></div>
+      </a>
+      <a class="prob-item" href="dp/hard/super-frog.html">
+        <div class="prob-num">16</div>
+        <div class="prob-emoji">🐸</div>
+        <div class="prob-info">
+          <div class="prob-name">Super Frog Jump</div>
+          <div class="prob-pattern">dp[i] = min over 3 jumps + forbidden platform checks</div>
+        </div>
+        <div class="prob-tags"><span class="tag tag-dp">DP</span><span class="tag tag-hard">Hard</span></div>
+      </a>
+    </div>
+  </div>
+
   <!-- BY CATEGORY -->
   <div class="section-title">Browse by category</div>
 
@@ -591,6 +642,48 @@ footer {
         <a class="prob-item" href="greedy/hard/road-trip-fuel.html">
           <div class="prob-emoji" style="padding-left:16px">⛽</div>
           <div class="prob-info"><div class="prob-name">Road Trip Fuel</div><div class="prob-pattern">Resource management + just-in-time refuelling</div></div>
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <div class="cat-block">
+    <div class="cat-header">🧩 Dynamic Programming</div>
+
+    <div class="diff-group">
+      <div class="diff-label">Easy</div>
+      <div class="prob-list">
+        <a class="prob-item" href="dp/easy/staircase.html">
+          <div class="prob-emoji" style="padding-left:16px">🪜</div>
+          <div class="prob-info"><div class="prob-name">Staircase Climbing</div><div class="prob-pattern">dp[i] = dp[i−1] + dp[i−2]</div></div>
+        </a>
+        <a class="prob-item" href="dp/easy/coin-change.html">
+          <div class="prob-emoji" style="padding-left:16px">🪙</div>
+          <div class="prob-info"><div class="prob-name">Coin Change</div><div class="prob-pattern">dp[i] = min(dp[i−1], dp[i−3]) + 1</div></div>
+        </a>
+      </div>
+    </div>
+
+    <div class="diff-group">
+      <div class="diff-label">Medium</div>
+      <div class="prob-list">
+        <a class="prob-item" href="dp/medium/frog-jump.html">
+          <div class="prob-emoji" style="padding-left:16px">🐸</div>
+          <div class="prob-info"><div class="prob-name">Frog Jump</div><div class="prob-pattern">dp[i] = min cost, 2 jump options</div></div>
+        </a>
+        <a class="prob-item" href="dp/medium/broken-calculator.html">
+          <div class="prob-emoji" style="padding-left:16px">🔢</div>
+          <div class="prob-info"><div class="prob-name">Broken Calculator</div><div class="prob-pattern">Work backwards with while loop</div></div>
+        </a>
+      </div>
+    </div>
+
+    <div class="diff-group">
+      <div class="diff-label">Hard</div>
+      <div class="prob-list">
+        <a class="prob-item" href="dp/hard/super-frog.html">
+          <div class="prob-emoji" style="padding-left:16px">🐸</div>
+          <div class="prob-info"><div class="prob-name">Super Frog Jump</div><div class="prob-pattern">3 jump options + forbidden platforms</div></div>
         </a>
       </div>
     </div>

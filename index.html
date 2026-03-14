@@ -1032,6 +1032,24 @@ footer {
     var msg = document.getElementById('tryit-msg');
     if (!ws) return;
 
+    var start = ws.getBlocksByType('tryit_start')[0];
+    var end   = ws.getBlocksByType('tryit_end')[0];
+    var chainOk = false;
+    if (start && end) {
+      var b = start;
+      while (b) {
+        if (b.type === 'tryit_end') { chainOk = true; break; }
+        b = b.getNextBlock();
+      }
+    }
+    if (!chainOk) {
+      box.classList.remove('pass', 'fail');
+      box.classList.add('fail');
+      val.textContent = '—';
+      msg.textContent = 'Your blocks must connect from 🟢 Start all the way down to 🔴 End. Snap them together!';
+      return;
+    }
+
     window.__tryit_output = null;
     var code = javascript.javascriptGenerator.workspaceToCode(ws);
     try { eval(code); } catch(e) { /* ignore */ }

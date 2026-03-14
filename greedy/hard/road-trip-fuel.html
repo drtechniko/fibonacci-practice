@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Road Trip Fuel — OlimBlock</title>
+<title>Road Trip Fuel — Fibonacci</title>
 
 <script src="https://unpkg.com/blockly@10.4.3/blockly_compressed.js"></script>
 <script src="https://unpkg.com/blockly@10.4.3/blocks_compressed.js"></script>
@@ -36,6 +36,8 @@ body { font-family:'Nunito',sans-serif; background:#eef6f1; height:100vh; displa
 .lvl-tab.active { background:#fff; color:var(--green-dk); border-color:#fff; }
 .lvl-tab.done   { background:var(--green); border-color:var(--green); color:#fff; }
 .lvl-tab.active.done { background:#fff; color:var(--green-dk); }
+.lvl-tab.fail   { background:var(--red); border-color:var(--red); color:#fff; }
+.lvl-tab.active.fail { background:#fff; color:var(--red); border-color:#fff; }
 #prog-wrap { height:4px; background:var(--g200); flex-shrink:0; }
 #prog-bar  { height:100%; background:var(--green); width:0%; transition:width .5s; }
 #main { display:flex; flex:1; overflow:hidden; }
@@ -92,7 +94,7 @@ body { font-family:'Nunito',sans-serif; background:#eef6f1; height:100vh; displa
 <div id="load-error">⚠️ Blockly failed to load. Check your internet connection and refresh.</div>
 
 <div id="topbar">
-  <div class="logo">⛽ <em>OlimBlock</em></div>
+  <div class="logo">⛽ <em>Fibonacci</em></div>
   <div class="prob-title">Road Trip Fuel</div>
   <div class="sp"></div>
   <div id="lvl-tabs">
@@ -205,7 +207,7 @@ LEVELS.forEach(lv => {
 
 let currentLevel = 0;
 let ws = null;
-let solved = [false, false, false, false];
+let results = [null, null, null, null];
 let stepLines = [], stepIdx = 0;
 
 function defineCustomBlocks() {
@@ -345,6 +347,9 @@ window.addEventListener('DOMContentLoaded', function () {
     zoom: { controls: true, wheel: true, startScale: 1.0, maxScale: 3, minScale: 0.3, scaleSpeed: 1.2 },
     grid: { spacing: 24, length: 4, colour: '#e5e7eb', snap: true },
   });
+  Blockly.Xml.clearWorkspaceAndLoadFromXml(
+    Blockly.utils.xml.textToDom(WORKSPACE_XML), ws
+  );
   window.addEventListener('resize', () => Blockly.svgResize(ws));
   loadLevel(0);
 });
@@ -353,12 +358,7 @@ function loadLevel(idx) {
   currentLevel = idx;
   resetStep();
   const lv = LEVELS[idx];
-  document.querySelectorAll('.lvl-tab').forEach((t, i) => {
-    const c = ['lvl-tab'];
-    if (i === idx) c.push('active');
-    if (solved[i]) c.push('done');
-    t.className = c.join(' ');
-  });
+  updateTabs();
   const segCount = lv.N - 1;
   document.getElementById('in-display').innerHTML = `
     <div class="var-row"><span class="var-name">N</span><span class="var-val">${lv.N}</span><span class="var-desc">number of towns</span></div>
@@ -368,60 +368,68 @@ function loadLevel(idx) {
   `;
   document.getElementById('exp-val').textContent = lv.expected;
   document.getElementById('hint-box').innerHTML = lv.hint;
-  const ob = document.getElementById('out-box');
-  ob.className = '';
-  document.getElementById('out-val').textContent = '—';
-  document.getElementById('out-msg').textContent = 'Run your program to see the result.';
-  Blockly.Xml.clearWorkspaceAndLoadFromXml(Blockly.utils.xml.textToDom(WORKSPACE_XML), ws);
+  showLevelResult(idx);
   clearLog();
   addLog(`Level ${idx + 1} — N=${lv.N}, F=${lv.F}, R=${lv.R}, expected stops: ${lv.expected}`);
   addLog(`Fuel: ${lv.fuel.map((v,i)=>`[seg ${i+1}]=${v}`).join('  ')}`);
+  const r = results[idx];
+  if (r) {
+    if (r.error) addErr(r.error);
+    else if (r.ok) addLog('✅ Correct! Got ' + r.answer);
+    else addLog('❌ Got ' + r.answer + ', expected ' + lv.expected);
+  }
   updateProg();
 }
 
+function validateChain() {
+  const start = ws.getBlocksByType('program_start')[0];
+  const end   = ws.getBlocksByType('program_end')[0];
+  if (!start || !end) return false;
+  let b = start;
+  while (b) {
+    if (b.type === 'program_end') return true;
+    b = b.getNextBlock();
+  }
+  return false;
+}
 function runCode() {
-  resetStep();
-  const lv = LEVELS[currentLevel];
-  clearLog();
+  resetStep(); clearLog();
+  if (!validateChain()) {
+    addErr('Your blocks must connect from 🟢 Start all the way down to 🔴 End. Snap them together!');
+    return;
+  }
   let code;
   try { code = Blockly.JavaScript.workspaceToCode(ws); }
   catch (e) { addErr('Code generation failed: ' + e.message); return; }
   if (!code.trim()) { addErr('Workspace has no logic yet!'); return; }
-  addLog('Running...');
-  const captured = [];
+  addLog('Running all levels...');
   const origAlert = window.alert;
-  window.alert = v => captured.push(String(v));
-  let err = null;
-  try {
-    new Function(`var N=${lv.N}; var F=${lv.F}; var R=${lv.R}; var fuel=${JSON.stringify(lv.fuel)};\n${code}`)();
-  } catch (e) { err = e.message; }
+  LEVELS.forEach((lv, i) => {
+    const captured = [];
+    window.alert = v => captured.push(String(v));
+    let err = null;
+    try { new Function(`var N=${lv.N}; var F=${lv.F}; var R=${lv.R}; var fuel=${JSON.stringify(lv.fuel)};\n${code}`)(); }
+    catch (e) { err = e.message; }
+    if (err) { results[i] = { answer: null, ok: false, error: 'Runtime error: ' + err }; addLog(`Level ${i+1}: ⚠ ${err}`); return; }
+    if (!captured.length) { results[i] = { answer: null, ok: false, error: 'No answer printed!' }; addLog(`Level ${i+1}: ⚠ No answer printed!`); return; }
+    const raw = captured[captured.length - 1]; const userAns = Number(raw);
+    if (isNaN(userAns)) { results[i] = { answer: raw, ok: false, error: 'Expected a number' }; addLog(`Level ${i+1}: ⚠ Expected a number`); return; }
+    const ok = userAns === lv.expected;
+    results[i] = { answer: userAns, ok: ok, error: null };
+    addLog(`Level ${i+1}: ${ok ? '✅' : '❌'} Got ${userAns}, expected ${lv.expected}`);
+  });
   window.alert = origAlert;
-  if (err) { addErr('Runtime error: ' + err); showOut(null, false); return; }
-  if (!captured.length) { addErr('No answer printed!'); showOut(null, false); return; }
-  const raw = captured[captured.length - 1];
-  const userAns = Number(raw);
-  addLog('Your output: ' + captured.join(' → '));
-  if (isNaN(userAns)) { addErr('Expected a number, got: "' + raw + '"'); showOut(null, false); return; }
-  const ok = userAns === lv.expected;
-  showOut(userAns, ok);
-  if (ok) {
-    solved[currentLevel] = true; updateProg();
-    addLog('✅ Correct! Minimum stops = ' + lv.expected);
-    doConfetti();
-    document.querySelectorAll('.lvl-tab').forEach((t, i) => {
-      const c = ['lvl-tab'];
-      if (i === currentLevel) c.push('active');
-      if (solved[i]) c.push('done');
-      t.className = c.join(' ');
-    });
-  } else {
-    addLog(`❌ Got ${userAns}, expected ${lv.expected}. Try again!`);
-  }
+  updateTabs(); showLevelResult(currentLevel); updateProg();
+  if (results.every(r => r && r.ok)) doConfetti();
 }
 
 function doStep() {
   const lv = LEVELS[currentLevel];
   if (!stepLines.length) {
+    if (!validateChain()) {
+      addErr('Your blocks must connect from 🟢 Start all the way down to 🔴 End. Snap them together!');
+      return;
+    }
     let code;
     try { code = Blockly.JavaScript.workspaceToCode(ws); }
     catch (e) { addErr(e.message); return; }
@@ -453,7 +461,15 @@ function resetStep() {
   document.getElementById('snum').textContent = '0';
   if (ws) ws.getAllBlocks(false).forEach(b => b.setHighlighted && b.setHighlighted(false));
 }
-function clearWS() { if (confirm('Reset workspace?')) { loadLevel(currentLevel); clearLog(); addLog('Workspace reset.'); } }
+function clearWS() {
+  if (confirm('Reset workspace? (Start and End blocks will stay)')) {
+    results = [null, null, null, null];
+    Blockly.Xml.clearWorkspaceAndLoadFromXml(
+      Blockly.utils.xml.textToDom(WORKSPACE_XML), ws
+    );
+    loadLevel(currentLevel);
+  }
+}
 
 function showOut(val, ok) {
   const ob = document.getElementById('out-box');
@@ -462,10 +478,43 @@ function showOut(val, ok) {
   else if (ok) { ob.className = 'pass'; document.getElementById('out-msg').textContent = '🎉 Correct! Amazing work!'; }
   else { ob.className = 'fail'; document.getElementById('out-msg').textContent = `Expected ${LEVELS[currentLevel].expected}. Try again!`; }
 }
+function updateTabs() {
+  document.querySelectorAll('.lvl-tab').forEach((t, i) => {
+    const c = ['lvl-tab'];
+    if (i === currentLevel) c.push('active');
+    const r = results[i];
+    if (r && r.ok)        c.push('done');
+    else if (r && !r.ok)  c.push('fail');
+    t.className = c.join(' ');
+  });
+}
+function showLevelResult(idx) {
+  const ob = document.getElementById('out-box');
+  const r = results[idx];
+  if (!r) {
+    ob.className = '';
+    document.getElementById('out-val').textContent = '—';
+    document.getElementById('out-msg').textContent = 'Run your program to see the result.';
+    return;
+  }
+  if (r.error && r.answer === null) {
+    ob.className = 'fail';
+    document.getElementById('out-val').textContent = '—';
+    document.getElementById('out-msg').textContent = r.error;
+  } else if (r.ok) {
+    ob.className = 'pass';
+    document.getElementById('out-val').textContent = r.answer;
+    document.getElementById('out-msg').textContent = '🎉 Correct! Amazing work!';
+  } else {
+    ob.className = 'fail';
+    document.getElementById('out-val').textContent = r.answer;
+    document.getElementById('out-msg').textContent = 'Expected ' + LEVELS[idx].expected + '. Try again!';
+  }
+}
 function clearLog() { document.getElementById('log').innerHTML = ''; }
 function addLog(m)  { const lb=document.getElementById('log'); const el=document.createElement('div'); el.className='ll'; el.textContent=m; lb.appendChild(el); lb.scrollTop=99999; }
 function addErr(m)  { const lb=document.getElementById('log'); const el=document.createElement('div'); el.className='le'; el.textContent='⚠ '+m; lb.appendChild(el); lb.scrollTop=99999; }
-function updateProg() { document.getElementById('prog-bar').style.width=(solved.filter(Boolean).length/LEVELS.length*100)+'%'; }
+function updateProg() { document.getElementById('prog-bar').style.width=(results.filter(r => r && r.ok).length/LEVELS.length*100)+'%'; }
 
 function doConfetti() {
   const cv=document.getElementById('cfetti'), cx=cv.getContext('2d');

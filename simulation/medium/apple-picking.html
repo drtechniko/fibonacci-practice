@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Apple Picking — OlimBlock</title>
+<title>Apple Picking — Fibonacci</title>
 
 <!-- Blockly v10: load order matters — core → blocks → JS generator → messages -->
 <script src="https://unpkg.com/blockly@10.4.3/blockly_compressed.js"></script>
@@ -39,6 +39,8 @@ body { font-family:'Nunito',sans-serif; background:#eef6f1; height:100vh; displa
 .lvl-tab.active { background:#fff; color:var(--green-dk); border-color:#fff; }
 .lvl-tab.done   { background:var(--green); border-color:var(--green); color:#fff; }
 .lvl-tab.active.done { background:#fff; color:var(--green-dk); }
+.lvl-tab.fail   { background:var(--red); border-color:var(--red); color:#fff; }
+.lvl-tab.active.fail { background:#fff; color:var(--red); border-color:#fff; }
 
 #prog-wrap { height:4px; background:var(--g200); flex-shrink:0; }
 #prog-bar  { height:100%; background:var(--green); width:0%; transition:width .5s; }
@@ -104,7 +106,7 @@ body { font-family:'Nunito',sans-serif; background:#eef6f1; height:100vh; displa
 <div id="load-error">⚠️ Blockly failed to load. Check your internet connection and refresh.</div>
 
 <div id="topbar">
-  <div class="logo">🍎 <em>OlimBlock</em></div>
+  <div class="logo">🍎 <em>Fibonacci</em></div>
   <div class="prob-title">Apple Picking</div>
   <div class="sp"></div>
   <div id="lvl-tabs">
@@ -213,7 +215,7 @@ LEVELS.forEach(lv => {
 
 let currentLevel = 0;
 let ws = null;
-let solved = [false, false, false, false];
+let results = [null, null, null, null];
 let stepLines = [], stepIdx = 0;
 
 // ══════════════════════════════════════════════════════════
@@ -388,6 +390,9 @@ window.addEventListener('DOMContentLoaded', function () {
     grid: { spacing: 24, length: 4, colour: '#e5e7eb', snap: true },
   });
 
+  Blockly.Xml.clearWorkspaceAndLoadFromXml(
+    Blockly.utils.xml.textToDom(WORKSPACE_XML), ws
+  );
   window.addEventListener('resize', () => Blockly.svgResize(ws));
   loadLevel(0);
 });
@@ -399,15 +404,8 @@ function loadLevel(idx) {
   currentLevel = idx;
   resetStep();
   const lv = LEVELS[idx];
+  updateTabs();
 
-  document.querySelectorAll('.lvl-tab').forEach((t, i) => {
-    const c = ['lvl-tab'];
-    if (i === idx)  c.push('active');
-    if (solved[i])  c.push('done');
-    t.className = c.join(' ');
-  });
-
-  // Left panel — show trees as 1-indexed for students
   document.getElementById('in-display').innerHTML = `
     <div class="var-row">
       <span class="var-name">N</span>
@@ -428,29 +426,43 @@ function loadLevel(idx) {
   document.getElementById('exp-val').textContent = lv.expected;
   document.getElementById('hint-box').innerHTML = lv.hint;
 
-  const ob = document.getElementById('out-box');
-  ob.className = '';
-  document.getElementById('out-val').textContent = '—';
-  document.getElementById('out-msg').textContent = 'Run your program to see the result.';
-
-  // Reload scaffold (Start + End only, clean canvas)
-  Blockly.Xml.clearWorkspaceAndLoadFromXml(
-    Blockly.utils.xml.textToDom(WORKSPACE_XML), ws
-  );
+  showLevelResult(idx);
 
   clearLog();
   addLog(`Level ${idx + 1} — N=${lv.N}, K=${lv.K}, expected: ${lv.expected}`);
   addLog(`Trees (1-indexed): ${lv.apples.map((v,i)=>`[${i+1}]=${v}`).join('  ')}`);
+  const r = results[idx];
+  if (r) {
+    if (r.error) addErr(r.error);
+    else if (r.ok) addLog(`✅ Correct! Got ${r.answer}`);
+    else addLog(`❌ Got ${r.answer}, expected ${lv.expected}`);
+  }
   updateProg();
 }
 
 // ══════════════════════════════════════════════════════════
 //  RUN CODE
 // ══════════════════════════════════════════════════════════
+function validateChain() {
+  const start = ws.getBlocksByType('program_start')[0];
+  const end   = ws.getBlocksByType('program_end')[0];
+  if (!start || !end) return false;
+  let b = start;
+  while (b) {
+    if (b.type === 'program_end') return true;
+    b = b.getNextBlock();
+  }
+  return false;
+}
+
 function runCode() {
   resetStep();
-  const lv = LEVELS[currentLevel];
   clearLog();
+
+  if (!validateChain()) {
+    addErr('Your blocks must connect from 🟢 Start all the way down to 🔴 End. Snap them together!');
+    return;
+  }
 
   let code;
   try { code = Blockly.JavaScript.workspaceToCode(ws); }
@@ -460,46 +472,55 @@ function runCode() {
     addErr('Workspace has no logic yet! Build your algorithm between Start and End.'); return;
   }
 
-  addLog('Running...');
+  addLog('Running all levels...\n');
 
-  const captured = [];
   const origAlert = window.alert;
-  window.alert = v => captured.push(String(v));
+  let allPass = true;
 
-  let err = null;
-  try {
-    // apples array is 0-indexed internally; the apples_at block does (i-1) for students
-    new Function(
-      `var N=${lv.N}; var K=${lv.K}; var apples=${JSON.stringify(lv.apples)};\n${code}`
-    )();
-  } catch (e) { err = e.message; }
+  LEVELS.forEach((lv, i) => {
+    const captured = [];
+    window.alert = v => captured.push(String(v));
+    let err = null;
+    try {
+      new Function(
+        `var N=${lv.N}; var K=${lv.K}; var apples=${JSON.stringify(lv.apples)};\n${code}`
+      )();
+    } catch (e) { err = e.message; }
+
+    if (err) {
+      results[i] = { answer: null, ok: false, error: 'Runtime error: ' + err };
+      allPass = false;
+      addLog(`Level ${i+1}: ⚠ Runtime error: ${err}`);
+      return;
+    }
+    if (!captured.length) {
+      results[i] = { answer: null, ok: false, error: 'No answer printed! Use the "📤 print answer" block.' };
+      allPass = false;
+      addLog(`Level ${i+1}: ⚠ No answer printed`);
+      return;
+    }
+    const raw = captured[captured.length - 1];
+    const userAns = Number(raw);
+    if (isNaN(userAns)) {
+      results[i] = { answer: raw, ok: false, error: 'Expected a number, got: "' + raw + '"' };
+      allPass = false;
+      addLog(`Level ${i+1}: ⚠ Expected a number, got "${raw}"`);
+      return;
+    }
+    const ok = userAns === lv.expected;
+    results[i] = { answer: userAns, ok: ok, error: null };
+    if (!ok) allPass = false;
+    addLog(`Level ${i+1}: ${ok ? '✅' : '❌'} Got ${userAns}, expected ${lv.expected}`);
+  });
+
   window.alert = origAlert;
+  updateTabs();
+  showLevelResult(currentLevel);
+  updateProg();
 
-  if (err)              { addErr('Runtime error: ' + err); showOut(null, false); return; }
-  if (!captured.length) { addErr('No answer printed! Use the "📤 print answer" block.'); showOut(null, false); return; }
-
-  const raw = captured[captured.length - 1];
-  const userAns = Number(raw);
-  addLog('Your output: ' + captured.join(' → '));
-
-  if (isNaN(userAns)) { addErr('Expected a number, got: "' + raw + '"'); showOut(null, false); return; }
-
-  const ok = userAns === lv.expected;
-  showOut(userAns, ok);
-
-  if (ok) {
-    solved[currentLevel] = true;
-    updateProg();
-    addLog('✅ Correct! You collected exactly ' + lv.expected + ' apples!');
+  if (allPass) {
+    addLog('\n🎉 All levels passed!');
     doConfetti();
-    document.querySelectorAll('.lvl-tab').forEach((t, i) => {
-      const c = ['lvl-tab'];
-      if (i === currentLevel) c.push('active');
-      if (solved[i])          c.push('done');
-      t.className = c.join(' ');
-    });
-  } else {
-    addLog(`❌ Got ${userAns}, expected ${lv.expected}. Try again!`);
   }
 }
 
@@ -510,6 +531,10 @@ function doStep() {
   const lv = LEVELS[currentLevel];
 
   if (!stepLines.length) {
+    if (!validateChain()) {
+      addErr('Your blocks must connect from 🟢 Start all the way down to 🔴 End. Snap them together!');
+      return;
+    }
     let code;
     try { code = Blockly.JavaScript.workspaceToCode(ws); }
     catch (e) { addErr(e.message); return; }
@@ -556,33 +581,54 @@ function resetStep() {
 
 function clearWS() {
   if (confirm('Reset workspace? (Start and End blocks will stay)')) {
+    results = [null, null, null, null];
+    Blockly.Xml.clearWorkspaceAndLoadFromXml(
+      Blockly.utils.xml.textToDom(WORKSPACE_XML), ws
+    );
     loadLevel(currentLevel);
-    clearLog();
-    addLog('Workspace reset to starting state.');
   }
 }
 
 // ══════════════════════════════════════════════════════════
 //  UI HELPERS
 // ══════════════════════════════════════════════════════════
-function showOut(val, ok) {
+function updateTabs() {
+  document.querySelectorAll('.lvl-tab').forEach((t, i) => {
+    const c = ['lvl-tab'];
+    if (i === currentLevel) c.push('active');
+    const r = results[i];
+    if (r && r.ok)        c.push('done');
+    else if (r && !r.ok)  c.push('fail');
+    t.className = c.join(' ');
+  });
+}
+function showLevelResult(idx) {
   const ob = document.getElementById('out-box');
-  document.getElementById('out-val').textContent = (val === null) ? '—' : val;
-  if (val === null) {
+  const r = results[idx];
+  if (!r) {
+    ob.className = '';
+    document.getElementById('out-val').textContent = '—';
+    document.getElementById('out-msg').textContent = 'Run your program to see the result.';
+    return;
+  }
+  if (r.error && r.answer === null) {
     ob.className = 'fail';
-    document.getElementById('out-msg').textContent = 'Something went wrong — check the log.';
-  } else if (ok) {
+    document.getElementById('out-val').textContent = '—';
+    document.getElementById('out-msg').textContent = r.error;
+  } else if (r.ok) {
     ob.className = 'pass';
+    document.getElementById('out-val').textContent = r.answer;
     document.getElementById('out-msg').textContent = '🎉 Correct! Amazing work!';
   } else {
     ob.className = 'fail';
-    document.getElementById('out-msg').textContent = `Expected ${LEVELS[currentLevel].expected}. Try again!`;
+    document.getElementById('out-val').textContent = r.answer;
+    document.getElementById('out-msg').textContent = `Expected ${LEVELS[idx].expected}. Try again!`;
   }
 }
 function clearLog() { document.getElementById('log').innerHTML = ''; }
 function addLog(m)  { const lb=document.getElementById('log'); const el=document.createElement('div'); el.className='ll'; el.textContent=m; lb.appendChild(el); lb.scrollTop=99999; }
 function addErr(m)  { const lb=document.getElementById('log'); const el=document.createElement('div'); el.className='le'; el.textContent='⚠ '+m; lb.appendChild(el); lb.scrollTop=99999; }
-function updateProg() { document.getElementById('prog-bar').style.width=(solved.filter(Boolean).length/LEVELS.length*100)+'%'; }
+function updateProg() { document.getElementById('prog-bar').style.width=(results.filter(r => r && r.ok).length/LEVELS.length*100)+'%'; }
 
 // ══════════════════════════════════════════════════════════
 //  CONFETTI

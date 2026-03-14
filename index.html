@@ -8,6 +8,11 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
 
+<script src="https://unpkg.com/blockly@10.4.3/blockly_compressed.js"></script>
+<script src="https://unpkg.com/blockly@10.4.3/blocks_compressed.js"></script>
+<script src="https://unpkg.com/blockly@10.4.3/javascript_compressed.js"></script>
+<script src="https://unpkg.com/blockly@10.4.3/msg/en.js"></script>
+
 <style>
 :root {
   --green: #22a855;
@@ -76,11 +81,6 @@ body {
   font-size: 17px;
   font-weight: 700;
   color: var(--g700);
-  margin-bottom: 6px;
-}
-.gate-sub {
-  font-size: 14px;
-  color: var(--g400);
   margin-bottom: 24px;
   line-height: 1.5;
 }
@@ -157,9 +157,60 @@ body {
 }
 
 /* ── LAYOUT ── */
+.layout {
+  display: flex;
+  min-height: calc(100vh - 54px);
+}
+
+/* ── SIDEBAR ── */
+.sidebar {
+  width: 210px;
+  flex-shrink: 0;
+  position: sticky;
+  top: 54px;
+  height: calc(100vh - 54px);
+  overflow-y: auto;
+  background: #fff;
+  border-right: 2px solid var(--g200);
+  padding: 20px 0;
+}
+.sidebar a {
+  display: block;
+  padding: 6px 20px;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--g600);
+  text-decoration: none;
+  border-left: 3px solid transparent;
+  transition: all 0.15s;
+}
+.sidebar a:hover {
+  color: var(--green-dk);
+  background: var(--green-lt);
+}
+.sidebar a.active {
+  color: var(--green-dk);
+  border-left-color: var(--green);
+  background: var(--green-lt);
+}
+.sidebar a.sub {
+  padding-left: 34px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--g400);
+}
+.sidebar a.sub:hover { color: var(--green-dk); }
+.sidebar a.sub.active { color: var(--green-dk); border-left-color: var(--green); background: var(--green-lt); }
+.sidebar .nav-spacer { height: 12px; }
+
+@media (max-width: 900px) {
+  .sidebar { display: none; }
+}
+
+/* ── MAIN CONTENT ── */
 .page {
+  flex: 1;
   max-width: 860px;
-  margin: 0 auto;
   padding: 40px 24px 80px;
 }
 
@@ -172,6 +223,7 @@ body {
   color: var(--g400);
   margin-bottom: 16px;
   margin-top: 48px;
+  scroll-margin-top: 70px;
 }
 .section-title:first-child { margin-top: 0; }
 
@@ -203,8 +255,92 @@ body {
   color: var(--g700);
 }
 
+/* ── HOW-TO BLOCK CARDS ── */
+.howto-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 12px;
+  margin-bottom: 24px;
+}
+.howto-card {
+  background: #fff;
+  border-radius: 10px;
+  padding: 16px 18px;
+  border-left: 4px solid var(--g200);
+}
+.howto-card.hc-start  { border-left-color: #22c55e; }
+.howto-card.hc-end    { border-left-color: var(--red); }
+.howto-card.hc-print  { border-left-color: #14b8a6; }
+.howto-card.hc-tool   { border-left-color: #6366f1; }
+.howto-icon { font-size: 22px; margin-bottom: 6px; }
+.howto-name {
+  font-size: 14px;
+  font-weight: 800;
+  color: var(--g900);
+  margin-bottom: 4px;
+}
+.howto-desc {
+  font-size: 13px;
+  line-height: 1.55;
+  color: var(--g600);
+}
+
+/* ── TRY IT WORKSPACE ── */
+.tryit-wrap {
+  background: #fff;
+  border: 2px solid var(--g200);
+  border-radius: 12px;
+  overflow: hidden;
+}
+.tryit-instruct {
+  padding: 14px 18px;
+  font-size: 14px;
+  color: var(--g700);
+  background: var(--g50);
+  border-bottom: 1px solid var(--g200);
+  line-height: 1.55;
+}
+.tryit-instruct strong { color: var(--g900); }
+#tryit-blockly {
+  height: 220px;
+  width: 100%;
+}
+.tryit-bar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 18px;
+  border-top: 1px solid var(--g200);
+  background: var(--g50);
+}
+.tryit-run {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 6px 16px;
+  background: var(--green);
+  color: #fff;
+  font-family: 'Nunito', sans-serif;
+  font-size: 13px;
+  font-weight: 800;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+.tryit-run:hover { background: var(--green-dk); }
+#tryit-output {
+  font-family: 'DM Mono', monospace;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--g700);
+  flex: 1;
+}
+#tryit-output.success { color: var(--green-dk); }
+#tryit-output.hint { color: var(--amber); }
+
 /* ── TEACHING ORDER ── */
-.phase-block { margin-bottom: 32px; }
+.phase-block { margin-bottom: 32px; scroll-margin-top: 70px; }
 .phase-label {
   font-size: 12px;
   font-weight: 800;
@@ -290,7 +426,7 @@ body {
 .tag-hard  { background: var(--red-lt);   color: #991b1b; }
 
 /* ── BY CATEGORY SECTION ── */
-.cat-block { margin-bottom: 32px; }
+.cat-block { margin-bottom: 32px; scroll-margin-top: 70px; }
 .cat-header {
   font-size: 16px;
   font-weight: 900;
@@ -328,9 +464,7 @@ footer {
 <div id="gate">
   <div class="gate-card">
     <div class="gate-logo">🐰 <em>Fibonacci Practice</em></div>
-    <div class="gate-hint">Enter the password to continue</div>
-    <div class="gate-sub">Hint: <strong>What is the 5th Fibonacci number?</strong><br>
-    (0, 1, 1, 2, 3, 5, 8 … — what's the 5th?)</div>
+    <div class="gate-hint">What is the 5th Fibonacci number?</div>
     <input id="gate-input" class="gate-input" type="text" placeholder="?" autocomplete="off" autofocus>
     <button class="gate-btn" onclick="checkPassword()">Enter →</button>
     <div class="gate-err" id="gate-err"></div>
@@ -342,10 +476,30 @@ footer {
   <div class="logo">🐰 <em>Fibonacci</em> <span class="logo-sub">Practice</span></div>
 </div>
 
+<div class="layout">
+
+<!-- SIDEBAR -->
+<nav class="sidebar">
+  <a href="#algorithms">Algorithms</a>
+  <a href="#how-to">How to solve</a>
+  <a href="#order">Teaching order</a>
+  <a href="#phase-1" class="sub">Phase 1</a>
+  <a href="#phase-2" class="sub">Phase 2</a>
+  <a href="#phase-3" class="sub">Phase 3</a>
+  <a href="#phase-4" class="sub">Phase 4</a>
+  <a href="#phase-5" class="sub">Phase 5</a>
+  <div class="nav-spacer"></div>
+  <a href="#browse">Browse</a>
+  <a href="#cat-sim" class="sub">Simulation</a>
+  <a href="#cat-greedy" class="sub">Greedy</a>
+  <a href="#cat-dp" class="sub">Dynamic Prog.</a>
+</nav>
+
+<!-- MAIN CONTENT -->
 <div class="page">
 
   <!-- ALGORITHM INTRO -->
-  <div class="section-title">What kind of algorithms will we learn?</div>
+  <div class="section-title" id="algorithms">What kind of algorithms will we learn?</div>
   <div class="algo-grid">
     <div class="algo-card sim">
       <div class="algo-icon">🎮</div>
@@ -364,10 +518,47 @@ footer {
     </div>
   </div>
 
-  <!-- RECOMMENDED TEACHING ORDER -->
-  <div class="section-title">Recommended order — start here!</div>
+  <!-- HOW TO SOLVE -->
+  <div class="section-title" id="how-to">How to solve a problem</div>
 
-  <div class="phase-block">
+  <div class="howto-grid">
+    <div class="howto-card hc-start">
+      <div class="howto-icon">🟢</div>
+      <div class="howto-name">Start program</div>
+      <div class="howto-desc">Every solution begins here. Snap your blocks below this green block. It's already on the canvas — don't delete it.</div>
+    </div>
+    <div class="howto-card hc-end">
+      <div class="howto-icon">🔴</div>
+      <div class="howto-name">End program</div>
+      <div class="howto-desc">Every solution ends here. Your chain of blocks must connect all the way down to this red block.</div>
+    </div>
+    <div class="howto-card hc-print">
+      <div class="howto-icon">📤</div>
+      <div class="howto-name">print answer</div>
+      <div class="howto-desc">This is how you submit your answer. Snap a number or variable into it — the grader reads whatever you print.</div>
+    </div>
+    <div class="howto-card hc-tool">
+      <div class="howto-icon">🧰</div>
+      <div class="howto-name">Toolbox</div>
+      <div class="howto-desc">The coloured panel inside each problem holds all your blocks: Inputs, Loops, Logic, Math, Variables, and Output. Drag from there onto the canvas.</div>
+    </div>
+  </div>
+
+  <div class="tryit-wrap">
+    <div class="tryit-instruct">
+      <strong>Try it!</strong> Drag the <strong>👋 say hello</strong> block from the toolbox and snap it between Start and End. Then press <strong>▶ Run</strong>.
+    </div>
+    <div id="tryit-blockly"></div>
+    <div class="tryit-bar">
+      <button class="tryit-run" onclick="runTryIt()">▶ Run</button>
+      <div id="tryit-output"></div>
+    </div>
+  </div>
+
+  <!-- RECOMMENDED TEACHING ORDER -->
+  <div class="section-title" id="order">Recommended order — start here!</div>
+
+  <div class="phase-block" id="phase-1">
     <div class="phase-label">
       <span class="badge badge-phase1">Phase 1</span>
       Foundations — master the basics
@@ -412,7 +603,7 @@ footer {
     </div>
   </div>
 
-  <div class="phase-block">
+  <div class="phase-block" id="phase-2">
     <div class="phase-label">
       <span class="badge badge-phase2">Phase 2</span>
       Core Patterns — combine what you know
@@ -466,7 +657,7 @@ footer {
     </div>
   </div>
 
-  <div class="phase-block">
+  <div class="phase-block" id="phase-3">
     <div class="phase-label">
       <span class="badge badge-phase3">Phase 3</span>
       Challenge — think differently
@@ -493,7 +684,7 @@ footer {
     </div>
   </div>
 
-  <div class="phase-block">
+  <div class="phase-block" id="phase-4">
     <div class="phase-label">
       <span class="badge badge-phase4">Phase 4</span>
       Intro DP — remember your answers
@@ -520,7 +711,7 @@ footer {
     </div>
   </div>
 
-  <div class="phase-block">
+  <div class="phase-block" id="phase-5">
     <div class="phase-label">
       <span class="badge badge-phase5">Phase 5</span>
       DP Mastery — harder recurrences
@@ -557,9 +748,9 @@ footer {
   </div>
 
   <!-- BY CATEGORY -->
-  <div class="section-title">Browse by category</div>
+  <div class="section-title" id="browse">Browse by category</div>
 
-  <div class="cat-block">
+  <div class="cat-block" id="cat-sim">
     <div class="cat-header">🎮 Simulation</div>
 
     <div class="diff-group">
@@ -613,7 +804,7 @@ footer {
     </div>
   </div>
 
-  <div class="cat-block">
+  <div class="cat-block" id="cat-greedy">
     <div class="cat-header">🏆 Greedy</div>
 
     <div class="diff-group">
@@ -647,7 +838,7 @@ footer {
     </div>
   </div>
 
-  <div class="cat-block">
+  <div class="cat-block" id="cat-dp">
     <div class="cat-header">🧩 Dynamic Programming</div>
 
     <div class="diff-group">
@@ -690,10 +881,12 @@ footer {
   </div>
 
 </div><!-- /page -->
+</div><!-- /layout -->
 
 <footer>Fibonacci Practice · drtechniko.github.io/fibonacci-practice</footer>
 
 <script>
+  /* ── PASSWORD GATE ── */
   const CORRECT = '5';
 
   function checkPassword() {
@@ -717,6 +910,113 @@ footer {
   document.getElementById('gate-input').addEventListener('keydown', function(e) {
     if (e.key === 'Enter') checkPassword();
   });
+
+  /* ── BLOCKLY: TRY IT WORKSPACE ── */
+  (function initTryIt() {
+    if (typeof Blockly === 'undefined') return;
+
+    var gen = javascript.javascriptGenerator;
+
+    Blockly.Blocks['tryit_start'] = {
+      init: function() {
+        this.appendDummyInput().appendField('🟢  Start program');
+        this.setNextStatement(true, null);
+        this.setColour(120);
+        this.setDeletable(false);
+        this.setMovable(true);
+      }
+    };
+    gen.forBlock['tryit_start'] = function() { return ''; };
+
+    Blockly.Blocks['tryit_end'] = {
+      init: function() {
+        this.appendDummyInput().appendField('🔴  End program');
+        this.setPreviousStatement(true, null);
+        this.setColour(0);
+        this.setDeletable(false);
+        this.setMovable(true);
+      }
+    };
+    gen.forBlock['tryit_end'] = function() { return ''; };
+
+    Blockly.Blocks['say_hello'] = {
+      init: function() {
+        this.appendDummyInput().appendField('👋  say hello');
+        this.setPreviousStatement(true, null);
+        this.setNextStatement(true, null);
+        this.setColour(160);
+      }
+    };
+    gen.forBlock['say_hello'] = function() {
+      return 'window.__tryit_output = "Hello!";\n';
+    };
+
+    var toolbox = '<xml><block type="say_hello"></block></xml>';
+
+    var ws = Blockly.inject('tryit-blockly', {
+      toolbox: toolbox,
+      scrollbars: false,
+      trashcan: true,
+      zoom: { controls: false, wheel: false, startScale: 1.0 },
+      grid: { spacing: 24, length: 4, colour: '#e5e7eb', snap: true }
+    });
+
+    var startXml = '<xml xmlns="https://developers.google.com/blockly/xml">' +
+      '<block type="tryit_start" x="30" y="20" deletable="false" movable="true"></block>' +
+      '<block type="tryit_end" x="30" y="130" deletable="false" movable="true"></block>' +
+      '</xml>';
+    Blockly.Xml.domToWorkspace(Blockly.utils.xml.textToDom(startXml), ws);
+
+    window.__tryit_ws = ws;
+  })();
+
+  function runTryIt() {
+    var ws = window.__tryit_ws;
+    var out = document.getElementById('tryit-output');
+    if (!ws) { out.textContent = 'Blockly not loaded.'; return; }
+
+    window.__tryit_output = null;
+    var code = javascript.javascriptGenerator.workspaceToCode(ws);
+    try { eval(code); } catch(e) { /* ignore */ }
+
+    if (window.__tryit_output) {
+      out.textContent = 'Output: ' + window.__tryit_output;
+      out.className = 'success';
+    } else {
+      out.textContent = 'Nothing to run yet — try snapping a block between Start and End!';
+      out.className = 'hint';
+    }
+  }
+
+  /* ── SIDEBAR: ACTIVE SECTION HIGHLIGHTING ── */
+  (function initSidebarObserver() {
+    var ids = [
+      'algorithms', 'how-to', 'order',
+      'phase-1', 'phase-2', 'phase-3', 'phase-4', 'phase-5',
+      'browse', 'cat-sim', 'cat-greedy', 'cat-dp'
+    ];
+    var links = {};
+    document.querySelectorAll('.sidebar a').forEach(function(a) {
+      var href = a.getAttribute('href');
+      if (href) links[href.replace('#', '')] = a;
+    });
+
+    var current = null;
+    var observer = new IntersectionObserver(function(entries) {
+      entries.forEach(function(entry) {
+        if (entry.isIntersecting) {
+          if (current) current.classList.remove('active');
+          var link = links[entry.target.id];
+          if (link) { link.classList.add('active'); current = link; }
+        }
+      });
+    }, { rootMargin: '-60px 0px -70% 0px', threshold: 0 });
+
+    ids.forEach(function(id) {
+      var el = document.getElementById(id);
+      if (el) observer.observe(el);
+    });
+  })();
 </script>
 </body>
 </html>
